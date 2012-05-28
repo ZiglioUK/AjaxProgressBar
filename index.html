@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <title>- jsFiddle demo by ZiglioNZ</title>
+        <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js' http://code.jquery.com/jquery.min.js>
+        </script>
+        <script type="text/javascript" src="http://code.jquery.com/ui/1.8.18/jquery-ui.min.js">
+        </script>
+        <link rel="stylesheet" type="text/css" href="/css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+        <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css">
+        <script type='text/javascript' src="http://cloud.github.com/downloads/SteveSanderson/knockout/knockout-2.1.0.debug.js">
+        </script>
+        <style type='text/css'>
+            .ui-progressbar .ui-progressbar-animated {
+                background: url("http://view.jqueryui.com/master/demos/progressbar/images/pbar-ani.gif");
+            }
+            
+            #progressbar {
+                width: 95%;
+                margin: 10px auto;
+            }
+        </style>
+        <script type='text/javascript'>
+            //<![CDATA[ 
+            $(window).load(function(){
+                model = {
+                    loaded: ko.observable(0),
+                    total: ko.observable(1118012), // alternatively you can read the total length from an http header
+                    init: function(){
+                        ko.bindingHandlers.jqProgress = {
+                            init: function(element, valueAccessor, allBindingsAccessor, viewModel){
+                                var options = {
+                                    value: 0
+                                };
+                                var bar = $(element);
+                                bar.progressbar(options);
+                            },
+                            
+                            update: function(element, valueAccessor, viewModel){
+                                var bar = $(element);
+                                var oldvalue = bar.progressbar("value");
+                                var newvalue = ko.utils.unwrapObservable(valueAccessor());
+                                
+                                if (oldvalue != newvalue) {
+                                    bar.progressbar("value", newvalue);
+                                }
+                            }
+                        };
+                        
+                        this.progress = ko.computed(function(){
+                            if (this.total()) 
+                                return this.loaded() / this.total() * 100;
+                            else 
+                                return 0;
+                        }, this);
+                    }
+                };
+                
+                model.init();
+                
+                ko.applyBindings(model);
+                
+                jQuery.ajax({
+                    url: "random750x750.jpg",
+                    cache: false, // for demo purposes
+                    xhr: function(){
+                        var xhr = jQuery.ajaxSettings.xhr();
+                        xhr.addEventListener("progress", function(e){
+                            if (!model.total() || model.total() <= 0) {
+                                if (e.totalSize && e.totalSize > 0) {
+                                    model.total(e.totalSize);
+                                }
+                                else {
+                                    model.total(e.target.getResponseHeader('content-length')); // you could pass a customer header 
+                                }
+                            }
+                            model.loaded(e.loaded);
+                        });
+                        return xhr;
+                    }
+                });
+            });//]]>  
+            
+        </script>
+    </head>
+    <body>
+        Test Download Progress Bar 
+        <br/>
+        <div data-bind="jqProgress: model.progress">
+        </div>
+        <br/>
+    </body>
+</html>
