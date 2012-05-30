@@ -2,11 +2,12 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <title>- jsFiddle demo by ZiglioNZ</title>
+        <title>AjaxProgressBar demo by ZiglioNZ</title>
         <link rel="stylesheet" type="text/css" href="css/normalize.css">
         <link rel="stylesheet" type="text/css" href="css/result-light.css">
         <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css">
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js">
+        </script>
         <script type="text/javascript" src="http://code.jquery.com/ui/1.8.18/jquery-ui.min.js">
         </script>
         <script type='text/javascript' src="https://github.com/downloads/SteveSanderson/knockout/knockout-2.0.0.debug.js">
@@ -66,22 +67,31 @@
                     cache: false, // for demo purposes
                     xhr: function(){
                         var xhr = jQuery.ajaxSettings.xhr();
-                        xhr.addEventListener("progress", function(e){
-                            if (!model.total() || model.total() <= 0) {
-                                if (e.totalSize && e.totalSize > 0) {
-                                    model.total(e.totalSize);
-                                }
-                                else {
-                                    model.total(e.target.getResponseHeader('content-length')); // you could pass a customer header 
-                                }
-                            }
-                            model.loaded(e.loaded);
-                        });
+                        if( 'onprogress' in xhr ) {
+                          xhr.onprogress = function(e){
+                              if (!model.total() || model.total() <= 0) {
+                                  if (e.totalSize && e.totalSize > 0) {
+                                      model.total(e.totalSize);
+                                  }
+                                  else {
+                                      model.total(e.target.getResponseHeader('content-length')); // you could pass a customer header 
+                                  }
+                              }
+                              model.loaded(e.loaded);
+                          };
+                        } else {
+                            xhr.onreadystatechange = function(){
+                              model.loaded(0);
+                          };
+                        }
                         return xhr;
+                    },
+                    complete: function(jqXHR, textStatus){
+                        model.total(jqXHR.getResponseHeader('Content-Length'));
+                        model.loaded( model.total());
                     }
                 });
             });//]]>  
-            
         </script>
     </head>
     <body>
