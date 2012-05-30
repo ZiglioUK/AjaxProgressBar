@@ -1,4 +1,4 @@
-It shows how you can hook to the XHR "progress" event in order to update a jQueryUI ProgressBar.
+It shows how you can hook to the XHR "progress" event in order to update a jQueryUI ProgressBar (Chrome, Firefox, IE10 hopefully).
 Also, an example on how to bind jQueryUI widgets to a knockout model.
 
 Demo "here":http://ziglionz.github.com/AjaxProgressBar/
